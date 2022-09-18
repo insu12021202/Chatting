@@ -1,14 +1,18 @@
 package ari.chat.domain;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private static Long id;
+    private Long id;
 
     private String name;
 

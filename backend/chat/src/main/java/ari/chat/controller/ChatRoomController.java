@@ -6,11 +6,9 @@ import ari.chat.dto.FindRoomDto;
 import ari.chat.dto.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ari.chat.service.ChatService;
 
-import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 

@@ -1,8 +1,12 @@
 package ari.chat.domain;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoomJoin {
 
     @Id
