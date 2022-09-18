@@ -18,6 +18,9 @@ public class ChatRoom {
     private Long roomId;
     private String roomName;
 
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
+    private List<ChatMessage> messages;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ChatRoomJoin> joinRooms;
 
@@ -26,6 +29,11 @@ public class ChatRoom {
         room.roomName = name;
 
         return room;
+    }
+
+    public void addMessage(ChatMessage message){
+        this.messages.add(message);
+        message.setChatRoom(this);
     }
 
     public void addRoom(ChatRoomJoin chatRoom){

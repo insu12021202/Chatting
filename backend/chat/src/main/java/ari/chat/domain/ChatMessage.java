@@ -5,10 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -16,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class ChatMessage {
+public class ChatMessage implements Comparable<ChatMessage>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +23,21 @@ public class ChatMessage {
     private MessageType type;
 
     //채팅방 ID
-    private String roomId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ChatRoom chatRoom;
+
     //보내는 사람
     private String sender;
     //내용
     private String content;
     //시간
-    private LocalDateTime time;
+    private LocalDateTime createTime;
+    private LocalDate createDate;
+
+    @Override
+    public int compareTo(ChatMessage o) {
+        return (int)(this.getCreateTime().getNano() - o.getCreateTime().getNano());
+    }
 
     public enum MessageType {
         CHAT, JOIN, LEAVE
