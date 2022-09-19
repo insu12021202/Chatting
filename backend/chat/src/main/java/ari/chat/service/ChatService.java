@@ -119,6 +119,8 @@ public class ChatService {
         message.setCreateTime(LocalDateTime.now());
 
         ChatRoom chatRoom = roomRepository.findById(roomId).orElse(null);
+        chatRoom.addMessage(message);
+
         message.setChatRoom(chatRoom);
         message.setSender(sender);
 

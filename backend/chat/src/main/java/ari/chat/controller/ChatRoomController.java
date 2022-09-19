@@ -33,7 +33,11 @@ public class ChatRoomController {
     // 채팅방 생성
     @PostMapping("/room")
     @ResponseBody
-    public CreateRoomDto createRoom(@RequestParam String name, @RequestParam String user1) {
+    public CreateRoomDto createRoom(@RequestBody Map<String, Object> maps) {
+
+        String name = (String)maps.get("name");
+        String user1 = (String)maps.get("user1");
+
         String user2 = "김우진";
         ChatRoom chatRoom = chatService.createRoom(name, user1, user2);
 
