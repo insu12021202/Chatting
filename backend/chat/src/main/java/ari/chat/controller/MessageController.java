@@ -34,6 +34,7 @@ public class MessageController {
 
     @MessageMapping("/chat/addUser")
     public void addUser(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor, @RequestParam Long roomId){
+
         headerAccessor.getSessionAttributes().put("username", message.getSender());
 
         String username = headerAccessor.getSessionAttributes().get("username").toString();
