@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -110,5 +111,17 @@ public class ChatService {
         }
 
         return groups;
+    }
+
+    @Transactional
+    public void saveMessage(ChatMessage message, Long roomId, String sender) {
+        message.setCreateDate(LocalDate.now());
+        message.setCreateTime(LocalDateTime.now());
+
+        ChatRoom chatRoom = roomRepository.findById(roomId).orElse(null);
+        message.setChatRoom(chatRoom);
+        message.setSender(sender);
+
+        messageRepository.save(message);
     }
 }
