@@ -23,7 +23,7 @@ public class ChatConfig implements WebSocketMessageBrokerConfigurer {
 
         // queue, topic으로 시작되는 메시지가 메시지 브로커로 라우팅 되도록 정의
         // 메시지 브로커는 특정 주제를 구독 한 연결된 모든 클라이언트에게 메시지를 broadcast
-        registry.enableSimpleBroker("/topic");
+        registry.enableSimpleBroker("/topic", "/queue");
 
         //app이 붙은 메시지들은 @MessageMapping이 붙은 method로 바운드된다.
         registry.setApplicationDestinationPrefixes("/app");
