@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
@@ -20,10 +19,4 @@ public class User {
         this.name = name;
     }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<ChatRoomJoin> joinRooms;
-
-    public void addRoom(ChatRoomJoin chatRoomJoin){
-        this.joinRooms.add(chatRoomJoin);
-    }
 }

@@ -1,0 +1,6 @@
+INSERT INTO chat_message (content, create_date, create_time, sender, type) VALUES ("안녕하세요~", "2022-09-20", NOW() , "이준", 0)
+INSERT INTO chat_message (content, create_date, create_time, sender, type) VALUES ("안녕하다능", "2022-09-20", "2022-09-20 17:15:41", "오덕훈", 0)
+INSERT INTO chat_message (content, create_date, create_time, sender, type) VALUES ("안녕하세요.", "2022-09-21", "2022-09-21 08:30:32", "안경원", 0)
+INSERT INTO chat_message (content, create_date, create_time, sender, type) VALUES ("안녕하세요...", "2022-09-21", "2022-09-21 13:53:45", "윤선아", 0)
+INSERT INTO chat_message (content, create_date, create_time, sender, type) VALUES ("안녕.", "2022-09-22", "2022-09-22 16:41:32", "인하윤", 0)
+INSERT INTO chat_message (content, create_date, create_time, sender, type) VALUES ("ㅎㅇㅎㅇ~", "2022-09-22", "2022-09-22 21:53:45", "이진희", 0)

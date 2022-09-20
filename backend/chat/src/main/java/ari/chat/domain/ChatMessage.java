@@ -3,6 +3,7 @@ package ari.chat.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -18,21 +19,17 @@ public class ChatMessage implements Comparable<ChatMessage>{
 
     private MessageType type;
 
-    //채팅방 ID
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ChatRoom chatRoom;
-
     //보내는 사람
     private String sender;
     //내용
     private String content;
     //시간
-    private LocalDateTime createTime;
+    private Timestamp createTime;
     private LocalDate createDate;
 
     @Override
     public int compareTo(ChatMessage o) {
-        return (int)(this.getCreateTime().getNano() - o.getCreateTime().getNano());
+        return (int)(this.getCreateTime().getTime() - o.getCreateTime().getTime());
     }
 
     public enum MessageType {

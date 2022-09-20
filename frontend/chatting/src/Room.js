@@ -25,7 +25,7 @@ const Room = () => {
 
   const onConnected = async () => {
     await axios
-      .post("/chat/room", { name: "roomName", user1: username })
+      .get("/chat/room")
       .then((res) => {
         console.log(res.data);
         setRoomID(res.data.roomId);
@@ -39,9 +39,9 @@ const Room = () => {
         console.log("send 이전");
         // Tell your username to the server
         stompClient.send(
-          "/app/chat/addUser",
+          '/app/chat/addUser',
           {},
-          JSON.stringify({ sender: username, type: "JOIN" })
+          JSON.stringify({ sender: username, type: "JOIN"})
         );
 
         console.log("send 이후");
