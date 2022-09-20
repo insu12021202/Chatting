@@ -3,33 +3,13 @@ import { useEffect, useState } from "react";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 
+let socket = new SockJS("http://localhost:8080//ws");
+let stompClient = Stomp.over(socket);
+
 const ChatRoom = ({ username }) => {
   const [chat, setChat] = useState("");
-  let stompClient = null;
-
-  let chatLog = [
-    {
-      "2022/09/01": [
-        { username: "a", chat: "hihihi", time: "12:10" },
-        { username: "b", chat: "hihihiasd", time: "12:13" },
-        { username: "c", chat: "hihihi", time: "12:15" },
-      ],
-    },
-    {
-      "2022/09/02": [
-        { username: "a", chat: "hihihi", time: "12:10" },
-        { username: "b", chat: "hihihiasd", time: "12:13" },
-        { username: "c", chat: "hihihi", time: "12:15" },
-      ],
-    },
-    {
-      "2022/09/03": [
-        { username: "a", chat: "hihihi", time: "12:10" },
-        { username: "b", chat: "hihihiasd", time: "12:13" },
-        { username: "c", chat: "hihihi", time: "12:15" },
-      ],
-    },
-  ];
+  const [message, setMessage] = useState("");
+  const [messageList, setMessageList] = useState("");
 
   useEffect(() => {
     connect();
@@ -37,9 +17,6 @@ const ChatRoom = ({ username }) => {
   //connet 함수
   const connect = () => {
     if (username) {
-      var socket = new SockJS("http://localhost:8080//ws");
-      stompClient = Stomp.over(socket);
-
       stompClient.connect({}, onConnected, () => {
         console.log("Error");
       });
@@ -50,6 +27,7 @@ const ChatRoom = ({ username }) => {
     await axios.get("/chat/room").then((res) => {
       //여기서 채팅 기록 받아오기
       console.log(res.data);
+      setMessageList(res.data.data);
       //받은 roomID를 기반으로 subscribe 주소 열기
       stompClient.subscribe("/topic/public", onMessageReceived);
 
@@ -73,42 +51,68 @@ const ChatRoom = ({ username }) => {
     } else if (message.type === "LEAVE") {
       console.log("Leave ", message.sender);
     } else {
-      console.log("Chatting: ", message.sender);
+      console.log("Chatting: ", message.content);
+      setMessage((prev) => [...prev, message.content]);
     }
   };
 
   const sendMessage = () => {
     if (chat && stompClient) {
+      console.log("send 실행됨, chat: ", chat);
       var chatMessage = {
         sender: username,
         content: chat,
         type: "CHAT",
       };
-      stompClient.send("app/chat/sendMessage", {}, JSON.stringify(chatMessage));
+      stompClient.send(
+        "/app/chat/sendMessage",
+        {},
+        JSON.stringify(chatMessage)
+      );
       setChat("");
     }
   };
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+  const onSubmit = () => {
     sendMessage();
   };
 
   const onChange = (e) => {
     setChat(e.target.value);
   };
-
-  return (
-    <>
-      <div></div>
-      <div>
-        <form onSubmit={onSubmit}>
+  if (!messageList) {
+    return <div>로딩 중</div>;
+  } else {
+    console.log("asdasd", messageList);
+    return (
+      <>
+        <div></div>
+        <div>
           <input onChange={onChange} value={chat} type="text"></input>
-          <button type="submit">전송</button>
-        </form>
-      </div>
-    </>
-  );
+          <button type="submit" onClick={onSubmit}>
+            전송
+          </button>
+          <div>
+            {messageList &&
+              messageList.map((item, i) => {
+                return (
+                  <div key={i}>
+                    <span key={i}>{item.date}</span>
+                    {item.messages.map((item, i) => {
+                      return <div key={i}>{item.content}</div>;
+                    })}
+                  </div>
+                );
+              })}
+            {message &&
+              message.map((item, i) => {
+                return <div key={i}>{item}</div>;
+              })}
+          </div>
+        </div>
+      </>
+    );
+  }
 };
 
 export default ChatRoom;
