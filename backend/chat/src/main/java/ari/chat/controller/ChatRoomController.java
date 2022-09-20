@@ -1,69 +1,73 @@
 package ari.chat.controller;
 
-import ari.chat.domain.ChatRoom;
-import ari.chat.dto.CreateRoomDto;
-import ari.chat.dto.FindRoomDto;
+import ari.chat.domain.ChatMessage;
+import ari.chat.domain.User;
+import ari.chat.dto.MessageDto;
 import ari.chat.dto.Result;
+import ari.chat.dto.RoomDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ari.chat.service.ChatService;
 
+import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/chat")
+@Slf4j
+//@RequestMapping("/chat")
 public class ChatRoomController {
     private final ChatService chatService;
+    private final SimpMessageSendingOperations sendingOperations;
 
-    // 모든 채팅방 목록 반환
-    @GetMapping("/rooms")
-    @ResponseBody
-    public Result<?> room() {
+    @MessageMapping("/chat/addUser")
+    public void addUser(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor){
 
-        List<CreateRoomDto> dto = chatService.findAllRoom().stream()
-                .map(chatRoom -> new CreateRoomDto(chatRoom.getRoomId(), chatRoom.getRoomName()))
-                .collect(Collectors.toList());
+        headerAccessor.getSessionAttributes().put("username", message.getSender());
 
-        return new Result(dto);
+        chatService.saveUser(new User(message.getSender()));
+
+        MessageDto messageDto = MessageDto.createMessageDto(message.getSender(), message.getCreateTime(),
+                message.getContent(), ChatMessage.MessageType.JOIN);
+
+        sendingOperations.convertAndSend("/topic/public", message);
+    }
+
+    @MessageMapping("/chat/sendMessage")
+    public void enter(@Payload ChatMessage message) {
+        if (ChatMessage.MessageType.JOIN.equals(message.getType())) {
+            message.setContent(message.getSender()+"님이 입장하였습니다.");
+        }
+
+        chatService.saveMessage(message, message.getSender());
+
+        MessageDto messageDto = MessageDto.createMessageDto(message.getSender(), message.getCreateTime(),
+                message.getContent(), ChatMessage.MessageType.CHAT);
+
+        sendingOperations.convertAndSend("/topic/public", message);
     }
 
     // 채팅방 생성
-    @PostMapping("/room")
+    @GetMapping("/chat/room")
     @ResponseBody
-    public CreateRoomDto createRoom(@RequestBody Map<String, Object> maps) {
+    public Result enterRoom() {
+        Map<LocalDate, List<ChatMessage>> chatting = chatService.getMessageGroups();
+        List<RoomDto> list = new ArrayList<>();
 
-        String name = (String)maps.get("name");
-        String user1 = (String)maps.get("user1");
+        int id = 0;
+        Set<LocalDate> keys = chatting.keySet();
+        for(LocalDate key : keys){
+            RoomDto dto = RoomDto.createRoomDto(key, chatting.get(key));
+            list.add(dto);
+        }
 
-        String user2 = "김우진";
-        ChatRoom chatRoom = chatService.createRoom(name, user1, user2);
-
-        return new CreateRoomDto(chatRoom.getRoomId(), chatRoom.getRoomName());
+        return new Result(list);
     }
 
-    // 특정 채팅방 조회
-    @GetMapping("/room/{roomId}")
-    @ResponseBody
-    public FindRoomDto roomInfo(@PathVariable String roomId) {
-        return chatService.findById(roomId);
-    }
-
-    /*
-    // 채팅방 입장 화면
-    @GetMapping("/room/enter/{roomId}")
-    public String roomDetail(Model model, @PathVariable String roomId) {
-
-        model.addAttribute("roomId", roomId);
-        return "/chat/roomdetail";
-    }
-
-    // 채팅 리스트 화면
-    @GetMapping("/room")
-    public String rooms(Model model) {
-        return "/chat/room";
-    }
-    */
 }

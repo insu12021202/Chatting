@@ -1,22 +1,20 @@
 package ari.chat.service;
 
-import ari.chat.Repository.JoinRepository;
 import ari.chat.Repository.MessageRepository;
-import ari.chat.Repository.RoomRepository;
 import ari.chat.Repository.UserRepository;
 import ari.chat.domain.ChatMessage;
-import ari.chat.domain.ChatRoom;
-import ari.chat.domain.ChatRoomJoin;
 import ari.chat.domain.User;
-import ari.chat.dto.FindRoomDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -24,59 +22,13 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 public class ChatService {
-
-    private final RoomRepository roomRepository;
     private final MessageRepository messageRepository;
-    private final JoinRepository joinRepository;
     private final UserRepository userRepository;
-
-    private Map<String, ChatRoom> chatRooms;
 
     @PostConstruct
     //의존관게 주입완료되면 실행되는 코드
     private void init() {
-        chatRooms = new LinkedHashMap<>();
-    }
-
-    //채팅방 불러오기
-    public List<ChatRoom> findAllRoom() {
-        /*
-        //채팅방 최근 생성 순으로 반환
-        List<ChatRoom> result = new ArrayList<>(chatRooms.values());
-        Collections.reverse(result);
-
-        */
-
-        return roomRepository.findAll();
-    }
-
-    //채팅방 하나 불러오기
-    public FindRoomDto findById(String roomId) {
-        //return chatRooms.get(roomId);
-
-        ChatRoom chatRoom = roomRepository.findById(Long.valueOf(roomId)).orElse(null);
-        FindRoomDto findRoomDto = FindRoomDto.createChatRoomDto(
-                chatRoom.getRoomId(), chatRoom.getRoomName(), getGroups(chatRoom.getMessages()));
-
-        return findRoomDto;
-    }
-
-    @Transactional
-    //채팅방 생성
-    public ChatRoom createRoom(String name, String userName1, String userName2) {
-        ChatRoom chatRoom = ChatRoom.create(name);
-        roomRepository.save(chatRoom);
-
-        User user1 = saveUser(new User(userName1));
-        User user2 = saveUser(new User(userName2));
-
-        ChatRoomJoin chatRoomJoin1 = new ChatRoomJoin(user1, chatRoom);
-        ChatRoomJoin chatRoomJoin2 = new ChatRoomJoin(user2, chatRoom);
-
-        joinRepository.save(chatRoomJoin1);
-        joinRepository.save(chatRoomJoin2);
-
-        return chatRoom;
+        //chatRooms = new LinkedHashMap<>();
     }
 
     @Transactional
@@ -85,8 +37,13 @@ public class ChatService {
         return user;
     }
 
+    public List<ChatMessage> getMessages(){
+        return messageRepository.findAll();
+    }
+
     // 채팅이 모여져있는 messages를 날짜별->오름차순으로 분류
-    public Map<LocalDate, List<ChatMessage>> getGroups(List<ChatMessage> messages){
+    public Map<LocalDate, List<ChatMessage>> getMessageGroups(){
+        List<ChatMessage> messages = messageRepository.findAll();
         TreeMap<LocalDate, List<ChatMessage>> groups = new TreeMap<>();
         List<ChatMessage> chatting;
 
@@ -114,14 +71,10 @@ public class ChatService {
     }
 
     @Transactional
-    public void saveMessage(ChatMessage message, Long roomId, String sender) {
-        message.setCreateDate(LocalDate.now());
-        message.setCreateTime(LocalDateTime.now());
+    public void saveMessage(ChatMessage message, String sender) {
+        message.setCreateDate(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDate());
+        message.setCreateTime(Timestamp.valueOf(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime()));
 
-        ChatRoom chatRoom = roomRepository.findById(roomId).orElse(null);
-        chatRoom.addMessage(message);
-
-        message.setChatRoom(chatRoom);
         message.setSender(sender);
 
         messageRepository.save(message);
