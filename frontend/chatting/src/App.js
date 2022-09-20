@@ -4,11 +4,15 @@ import ChatRoom from "./ChatRoom";
 import Room from "./Room";
 
 function App() {
+  const username = "INSU";
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Room />}></Route>
-        <Route path="/chatRoom" element={<ChatRoom />}></Route>
+        <Route path="/" element={<Room username={username} />}></Route>
+        <Route
+          path="/chatRoom"
+          element={<ChatRoom username={username} />}
+        ></Route>
       </Routes>
     </BrowserRouter>
   );
