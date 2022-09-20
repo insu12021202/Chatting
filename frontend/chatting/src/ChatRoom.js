@@ -1,14 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 
 const ChatRoom = ({ username }) => {
   const [chat, setChat] = useState("");
-
-  const [roomID, setRoomID] = useState();
-  const [roomName, setRoomName] = useState("");
   let stompClient = null;
 
   let chatLog = [
@@ -81,7 +77,7 @@ const ChatRoom = ({ username }) => {
     }
   };
 
-  const sendMessage = (event) => {
+  const sendMessage = () => {
     if (chat && stompClient) {
       var chatMessage = {
         sender: username,
@@ -91,12 +87,11 @@ const ChatRoom = ({ username }) => {
       stompClient.send("app/chat/sendMessage", {}, JSON.stringify(chatMessage));
       setChat("");
     }
-    event.preventDefault();
   };
 
   const onSubmit = (e) => {
-    sendMessage();
     e.preventDefault();
+    sendMessage();
   };
 
   const onChange = (e) => {
@@ -107,11 +102,9 @@ const ChatRoom = ({ username }) => {
     <>
       <div></div>
       <div>
-        <form>
+        <form onSubmit={onSubmit}>
           <input onChange={onChange} value={chat} type="text"></input>
-          <button type="submit" onClick={onSubmit}>
-            전송
-          </button>
+          <button type="submit">전송</button>
         </form>
       </div>
     </>
